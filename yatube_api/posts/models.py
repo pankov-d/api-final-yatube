@@ -4,6 +4,7 @@ from django.db import models
 from .constants import TITLE_MAX_LENGTH
 
 User = get_user_model()
+# User.__str__ = User.username
 
 
 class Group(models.Model):
@@ -26,6 +27,10 @@ class Post(models.Model):
         User, on_delete=models.CASCADE, related_name='posts')
     image = models.ImageField(
         upload_to='posts/', null=True, blank=True)
+    group = models.ForeignKey(
+        Group, on_delete=models.SET_NULL,
+        related_name='posts', blank=True, null=True
+    )
 
     class Meta:
         verbose_name = 'пост'
@@ -50,3 +55,21 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:50]
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',)
+    following = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',)
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'following'),
+                name='following_constraint'
+            ),)
