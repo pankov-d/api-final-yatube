@@ -10,10 +10,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        return obj.author == request.user
+        return (request.method in permissions.SAFE_METHODS
+                or obj.author == request.user)
 
 
 class IsOwnerorAdminorReadOnly(permissions.BasePermission):
@@ -24,8 +22,6 @@ class IsOwnerorAdminorReadOnly(permissions.BasePermission):
     В остальных случаях – False
     """
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        if permissions.IsAuthenticated:
-            return obj.author == request.user or request.user.is_staff
-        return False
+        return (request.method in permissions.SAFE_METHODS
+                or obj.author == request.user
+                or request.user.is_staff)

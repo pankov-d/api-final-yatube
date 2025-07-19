@@ -4,7 +4,10 @@ from posts.models import Comment, Post, Group, Follow, User
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
 
     class Meta:
         model = Post
@@ -20,7 +23,10 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
 
     class Meta:
         model = Comment
@@ -39,19 +45,15 @@ class FollowSerializer(serializers.ModelSerializer):
         required=True
     )
 
-    def validate(self, data):
+    def validate_following(self, value):
         user = self.context['request'].user
-        following = data['following']
-
-        if following == user:
+        if value == user:
             raise serializers.ValidationError(
                 '''Couldn't follow yourself''')
-        try:
-            Follow.objects.get(user=user, following=following)
+        if Follow.objects.filter(user=user, following=value).exists():
             raise serializers.ValidationError(
                 '''This user already followed by you''')
-        except Follow.DoesNotExist:
-            return data
+        return value
 
     class Meta:
         model = Follow

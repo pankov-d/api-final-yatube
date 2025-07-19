@@ -4,7 +4,6 @@ from django.db import models
 from .constants import TITLE_MAX_LENGTH
 
 User = get_user_model()
-# User.__str__ = User.username
 
 
 class Group(models.Model):
@@ -73,3 +72,8 @@ class Follow(models.Model):
                 fields=('user', 'following'),
                 name='following_constraint'
             ),)
+        verbose_name = 'подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f'{self.user.username} подписан на {self.following.username}'
